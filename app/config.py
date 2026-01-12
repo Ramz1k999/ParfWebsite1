@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings  # Изменено с pydantic_settings на pydantic
 
 
 class Settings(BaseSettings):
@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     APP_DESCRIPTION: str = "API для интернет-магазина парфюмерии"
 
     # Настройки CORS
-    # Настройки CORS
     CORS_ORIGINS: list = [
         "http://localhost:3000",  # React dev server (стандартный порт)
         "http://localhost:5000",  # Другой возможный порт
@@ -30,7 +29,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8080",
         "http://localhost",  # Без указания порта
         "http://127.0.0.1",
-        "https://yourfrontend.com"  # Продакшен URL (если есть)
+        "https://src-tjpz.onrender.com"  # Продакшен URL (если есть)
     ]
 
     # Настройки логирования
