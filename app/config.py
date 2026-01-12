@@ -29,7 +29,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8080",
         "http://localhost",  # Без указания порта
         "http://127.0.0.1",
-        "https://src-tjpz.onrender.com"  # Продакшен URL (если есть)
+        "https://src-tjpz.onrender.com",
+        "https://parfwebsite1.onrender.com" # Продакшен URL (если есть)
     ]
 
     # Настройки логирования
