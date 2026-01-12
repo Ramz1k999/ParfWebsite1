@@ -34,7 +34,7 @@ app_logger.info("Запуск API сервера")
 # CORS middleware для обработки запросов с разных доменов
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "https://src-tjpz.onrender.com"],  # Добавлен порт 3001
+    allow_origins=["http://localhost:3000", "https://src-tjpz.onrender.com"],  # Добавлен порт 3001
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
