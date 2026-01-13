@@ -43,7 +43,7 @@ class UserResponse(UserBase):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class UserListItem(BaseModel):
@@ -56,7 +56,7 @@ class UserListItem(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class UserListResponse(BaseModel):
