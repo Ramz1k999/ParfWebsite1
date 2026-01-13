@@ -21,16 +21,7 @@ class Settings(BaseSettings):
 
     # Настройки CORS
     CORS_ORIGINS: list = [
-        "http://localhost:3000",  # React dev server (стандартный порт)
-        "http://localhost:5000",  # Другой возможный порт
-        "http://localhost:8080",  # Еще один возможный порт
-        "http://127.0.0.1:3000",  # Через IP вместо localhost
-        "http://127.0.0.1:5000",
-        "http://127.0.0.1:8080",
-        "http://localhost",  # Без указания порта
-        "http://127.0.0.1",
-        "https://src-tjpz.onrender.com",
-        "https://parfwebsite1.onrender.com" # Продакшен URL (если есть)
+        "*" # Продакшен URL (если есть)
     ]
 
     # Настройки логирования
