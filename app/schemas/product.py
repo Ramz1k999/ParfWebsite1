@@ -43,7 +43,7 @@ class ProductDetail(BaseModel):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ProductListItem(BaseModel):
@@ -59,7 +59,7 @@ class ProductListItem(BaseModel):
     volume: Optional[str] = None
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ProductListResponse(BaseModel):
