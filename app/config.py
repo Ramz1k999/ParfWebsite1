@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     Настройки приложения, загружаемые из переменных окружения.
     """
     # Настройки базы данных
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost/perfume_store")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://perfume_user:cER5DO6SVZxzLjoxOufttAJU5XTXK8ju@dpg-d5ifb156ubrc738j2vig-a.virginia-postgres.render.com/perfume_store_xqdm")
 
     # Настройки JWT
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-should-be-at-least-32-characters")
