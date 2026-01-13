@@ -34,7 +34,7 @@ app_logger.info("Запуск API сервера")
 # CORS middleware для обработки запросов с разных доменов
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,  # Используем список из настроек
+    allow_origins=["https://src-tjpz.onrender.com"],  # Используем список из настроек
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
