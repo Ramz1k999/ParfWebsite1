@@ -6167,3 +6167,123 @@
 2026-01-12 08:30:03 - api - INFO - Завершение запроса: GET /api/auth/me - Статус: 200 - Время: 0.0025s
 2026-01-12 08:35:03 - api - INFO - Начало запроса: GET /api/auth/me
 2026-01-12 08:35:03 - api - INFO - Завершение запроса: GET /api/auth/me - Статус: 200 - Время: 0.0025s
+2026-01-13 07:11:14 - api - INFO - Начало запроса: GET /api/docs
+2026-01-13 07:11:14 - api - INFO - Завершение запроса: GET /api/docs - Статус: 200 - Время: 0.0016s
+2026-01-13 07:11:15 - api - INFO - Начало запроса: GET /api/openapi.json
+2026-01-13 07:11:15 - api - INFO - Завершение запроса: GET /api/openapi.json - Статус: 200 - Время: 0.0965s
+2026-01-13 07:12:33 - api - INFO - Начало запроса: GET /
+2026-01-13 07:12:33 - api - INFO - Завершение запроса: GET / - Статус: 200 - Время: 0.0045s
+2026-01-13 07:12:47 - api - INFO - Начало запроса: GET //api/admin/currency-rates
+2026-01-13 07:12:47 - api - INFO - Завершение запроса: GET //api/admin/currency-rates - Статус: 404 - Время: 0.0015s
+2026-01-13 07:13:27 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:13:27 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:13:57 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:13:57 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:13:59 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:13:59 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:17:53 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:17:53 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:18:42 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:42 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0011s
+2026-01-13 07:18:44 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:44 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:18:44 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:44 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:18:45 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:45 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0015s
+2026-01-13 07:18:45 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:45 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:18:46 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:46 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:18:48 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:18:48 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:18:58 - api - INFO - Начало запроса: GET //api/admin/currency-rates
+2026-01-13 07:18:58 - api - INFO - Завершение запроса: GET //api/admin/currency-rates - Статус: 404 - Время: 0.0011s
+2026-01-13 07:18:58 - api - INFO - Начало запроса: GET //api/admin/currency-rates
+2026-01-13 07:18:58 - api - INFO - Завершение запроса: GET //api/admin/currency-rates - Статус: 404 - Время: 0.0010s
+2026-01-13 07:19:09 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:19:09 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0000s
+2026-01-13 07:20:08 - api - INFO - Начало запроса: GET //api/admin/currency-rates
+2026-01-13 07:20:08 - api - INFO - Завершение запроса: GET //api/admin/currency-rates - Статус: 404 - Время: 0.0000s
+2026-01-13 07:20:20 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:20:20 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:20:21 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:20:21 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0010s
+2026-01-13 07:20:21 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:20:21 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0011s
+2026-01-13 07:21:23 - api - INFO - Начало запроса: POST //api/auth/login
+2026-01-13 07:21:23 - api - INFO - Завершение запроса: POST //api/auth/login - Статус: 404 - Время: 0.0015s
+2026-01-13 07:22:58 - api - INFO - Начало запроса: GET /api/admin/currency-rates
+2026-01-13 07:22:58 - api - INFO - Завершение запроса: GET /api/admin/currency-rates - Статус: 200 - Время: 0.0862s
+2026-01-13 07:24:45 - api - INFO - Начало запроса: POST /api/auth/login
+2026-01-13 07:24:45 - api - INFO - Завершение запроса: POST /api/auth/login - Статус: 200 - Время: 0.0652s
+2026-01-13 07:24:45 - api - INFO - Начало запроса: OPTIONS /api/auth/me
+2026-01-13 07:24:45 - api - INFO - Завершение запроса: OPTIONS /api/auth/me - Статус: 200 - Время: 0.0000s
+2026-01-13 07:24:45 - api - INFO - Начало запроса: GET /api/auth/me
+2026-01-13 07:24:45 - api - INFO - Начало запроса: GET /api/auth/me
+2026-01-13 07:24:45 - api - INFO - Начало запроса: OPTIONS /api/cart
+2026-01-13 07:24:45 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:24:45 - api - INFO - Завершение запроса: OPTIONS /api/cart - Статус: 200 - Время: 0.0050s
+2026-01-13 07:24:45 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0236s
+2026-01-13 07:24:45 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:24:45 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0052s
+2026-01-13 07:24:46 - api - INFO - Начало запроса: GET /api/cart
+2026-01-13 07:24:46 - api - INFO - Завершение запроса: GET /api/cart - Статус: 200 - Время: 0.0187s
+2026-01-13 07:25:10 - api - INFO - Начало запроса: OPTIONS /api/orders
+2026-01-13 07:25:10 - api - INFO - Завершение запроса: OPTIONS /api/orders - Статус: 200 - Время: 0.0000s
+2026-01-13 07:25:10 - api - INFO - Начало запроса: OPTIONS /api/orders
+2026-01-13 07:25:10 - api - INFO - Завершение запроса: OPTIONS /api/orders - Статус: 200 - Время: 0.0000s
+2026-01-13 07:25:10 - api - INFO - Начало запроса: GET /api/orders
+2026-01-13 07:25:10 - api - INFO - Завершение запроса: GET /api/orders - Статус: 200 - Время: 0.0310s
+2026-01-13 07:25:10 - api - INFO - Начало запроса: GET /api/orders
+2026-01-13 07:25:10 - api - INFO - Завершение запроса: GET /api/orders - Статус: 200 - Время: 0.0040s
+2026-01-13 07:25:12 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:25:12 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0060s
+2026-01-13 07:25:12 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:25:12 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0075s
+2026-01-13 07:29:46 - api - INFO - Начало запроса: GET /api/auth/me
+2026-01-13 07:30:25 - api - INFO - Начало запроса: POST /api/auth/login
+2026-01-13 07:30:25 - api - INFO - Завершение запроса: POST /api/auth/login - Статус: 200 - Время: 0.0040s
+2026-01-13 07:30:25 - api - INFO - Начало запроса: GET /api/auth/me
+2026-01-13 07:30:25 - api - INFO - Начало запроса: GET /api/auth/me
+2026-01-13 07:30:26 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:30:26 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0063s
+2026-01-13 07:30:26 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:30:26 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0055s
+2026-01-13 07:30:26 - api - INFO - Начало запроса: GET /api/cart
+2026-01-13 07:30:26 - api - INFO - Завершение запроса: GET /api/cart - Статус: 200 - Время: 0.0025s
+2026-01-13 07:33:16 - api - INFO - Начало запроса: OPTIONS /api/cart/add
+2026-01-13 07:33:16 - api - INFO - Завершение запроса: OPTIONS /api/cart/add - Статус: 200 - Время: 0.0000s
+2026-01-13 07:33:16 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:16 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0040s
+2026-01-13 07:33:18 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:18 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0025s
+2026-01-13 07:33:18 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:18 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0020s
+2026-01-13 07:33:18 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:18 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0022s
+2026-01-13 07:33:18 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:18 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0025s
+2026-01-13 07:33:19 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:19 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0024s
+2026-01-13 07:33:19 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:19 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0025s
+2026-01-13 07:33:19 - api - INFO - Начало запроса: POST /api/cart/add
+2026-01-13 07:33:19 - api - INFO - Завершение запроса: POST /api/cart/add - Статус: 422 - Время: 0.0036s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: OPTIONS /api/admin/currency-rates
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: OPTIONS /api/admin/currency-rates - Статус: 200 - Время: 0.0010s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: OPTIONS /api/admin/currency-rates
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: OPTIONS /api/admin/currency-rates - Статус: 200 - Время: 0.0000s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: GET /api/admin/currency-rates
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: GET /api/admin/currency-rates - Статус: 200 - Время: 0.0035s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: GET /api/admin/currency-rates
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: GET /api/admin/currency-rates - Статус: 200 - Время: 0.0037s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:33:36 - api - INFO - Начало запроса: GET /api/cart
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0713s
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: GET /api/cart - Статус: 200 - Время: 0.0723s
+2026-01-13 07:33:36 - api - INFO - Начало запроса: GET /api/products
+2026-01-13 07:33:36 - api - INFO - Завершение запроса: GET /api/products - Статус: 200 - Время: 0.0075s
+2026-01-13 07:38:37 - api - INFO - Начало запроса: OPTIONS /api/auth/me
+2026-01-13 07:38:37 - api - INFO - Завершение запроса: OPTIONS /api/auth/me - Статус: 200 - Время: 0.0000s
+2026-01-13 07:38:37 - api - INFO - Начало запроса: GET /api/auth/me

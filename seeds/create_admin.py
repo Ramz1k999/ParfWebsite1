@@ -17,7 +17,7 @@ def create_superadmin():
     db = SessionLocal()
     try:
         # Проверяем, существует ли уже суперадмин
-        email = "superadmin@example.com"  # Замените на нужный email
+        email = "jalol@example.com"  # Замените на нужный email
         existing_user = get_user_by_email(db, email)
 
         if existing_user:
@@ -32,8 +32,8 @@ def create_superadmin():
         superadmin = create_user(
             db=db,
             email=email,
-            username="superadmin",  # Замените на нужное имя пользователя
-            password="StrongSuperAdminPassword123!",  # Замените на надежный пароль
+            username="jalol",  # Замените на нужное имя пользователя
+            password="admin123!",  # Замените на надежный пароль
             full_name="Super Administrator",
             notes="Автоматически созданный суперадминистратор",
             role=UserRole.SUPERADMIN

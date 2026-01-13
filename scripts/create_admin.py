@@ -19,7 +19,7 @@ def create_initial_admin():
     db = SessionLocal()
     try:
         # Проверяем, существует ли администратор
-        admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
+        admin_email = os.getenv("ADMIN_EMAIL", "jalal@example.com")
         existing_admin = get_user_by_email(db, admin_email)
 
         if existing_admin:
