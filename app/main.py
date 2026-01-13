@@ -31,13 +31,13 @@ app = FastAPI(
 # Логируем запуск приложения
 app_logger.info("Запуск API сервера")
 
-# CORS middleware для обработки запросов с разных доменов
+# Use explicit CORS settings with all needed domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://src-tjpz.onrender.com", "https://parfwebsite1.onrender.com"],  # Используем список из настроек
+    allow_origins=["https://src-tjpz.onrender.com", "http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
 )
 
 # Добавляем middleware для логирования запросов
