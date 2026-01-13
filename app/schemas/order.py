@@ -31,7 +31,7 @@ class OrderItemResponse(BaseModel):
     comment: Optional[str] = None  # Комментарий к товару
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 # Схема для детального представления заказа
@@ -48,7 +48,7 @@ class OrderDetailResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 # Схема для элемента в списке заказов
@@ -63,8 +63,7 @@ class OrderListItem(BaseModel):
     total_amount: Optional[float] = None  # Для админского интерфейса
 
     class Config:
-        from_attributes = True
-
+        orm_mode = True
 
 # Схема для ответа со списком заказов
 class OrderListResponse(BaseModel):
