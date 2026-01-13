@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # Настройки CORS
     CORS_ORIGINS: list = [
-        "*" # Продакшен URL (если есть)
+        "https://src-tjpz.onrender.com" # Продакшен URL (если есть)
     ]
 
     # Настройки логирования
