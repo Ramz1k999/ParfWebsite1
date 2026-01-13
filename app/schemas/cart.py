@@ -32,7 +32,7 @@ class CartItemResponse(BaseModel):
     total_price_formatted: str  # 🔥 ДОБАВЛЕНО: для отображения
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class CartResponse(BaseModel):
