@@ -5,8 +5,10 @@ from datetime import datetime
 
 
 class CartAddRequest(BaseModel):
-    id: int = Field(..., description="ID товара")
-    count: int = Field(default=1, ge=1, description="Количество")
+    product_id: int
+    count: int = Field(default=1, ge=1)
+    comment: Optional[str] = None
+
 
 
 class CartRemoveRequest(BaseModel):
