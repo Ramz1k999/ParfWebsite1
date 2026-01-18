@@ -20,7 +20,11 @@ class Order(Base):
     order_number = Column(String, unique=True, index=True, nullable=False)
     user_session = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    status = Column(SQLEnum(OrderStatus), default="ожидает подтверждения")
+    status = Column(
+        SQLEnum(OrderStatus, native_enum=False),  # ← заставляет использовать строковое значение
+        default=OrderStatus.PENDING,
+        nullable=False
+    )
     total_amount = Column(Float, nullable=False)
     customer_name = Column(String, nullable=False)
     contact_phone = Column(String, nullable=False)
