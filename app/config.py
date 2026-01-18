@@ -1,5 +1,5 @@
 import os
-from pydantic import BaseSettings  # Изменено с pydantic_settings на pydantic
+from pydantic_settings import BaseSettings  # Изменено с pydantic_settings на pydantic
 
 
 class Settings(BaseSettings):
