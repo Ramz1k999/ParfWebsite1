@@ -68,14 +68,15 @@ def create_order(
     new_order = Order(
         order_number=order_number,
         user_session=user_session,
-        user_id=user_id,  # Связываем заказ с пользователем, если он авторизован
-        status="ожидает подтверждения",
+        user_id=user_id,
+        status=OrderStatus.ОЖИДАЕТ_ПОДТВЕРЖДЕНИЯ,  # ← используем правильный элемент Enum
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
         contact_email=contact_email,
         notes=notes
     )
+    
     db.add(new_order)
     db.flush()  # Чтобы получить ID заказа
 
