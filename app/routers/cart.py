@@ -17,7 +17,6 @@ from app.crud.cart import (
     remove_from_cart,
     get_cart_items,
     clear_cart,
-    update_cart_quantity,
     update_cart_comment,
     get_cart_item_by_id,
 )
@@ -36,7 +35,6 @@ def get_user_session(request: Request, response: Response, session: Optional[str
     if session:
         return session
 
-    # Создаем новую сессию
     new_session = str(uuid.uuid4())
     response.set_cookie(
         key="session",
@@ -49,11 +47,14 @@ def get_user_session(request: Request, response: Response, session: Optional[str
     return new_session
 
 
-# --- CORS preflight handler ---
+# --- CORS preflight handler (на все пути в этом роутере) ---
 @router.options("/{full_path:path}")
-async def preflight_handler():
-    """Пропускаем все preflight OPTIONS запросы для CORS"""
-    return JSONResponse(content={}, status_code=200)
+async def preflight_handler(response: Response):
+    response.headers["Access-Control-Allow-Origin"] = "https://src-tjpz.onrender.com"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Requested-With"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return Response(status_code=200)
 
 
 # --- Добавление товара ---
@@ -67,13 +68,13 @@ async def add_item_to_cart(
 ):
     user_session = get_user_session(request, response, session)
     try:
-        cart_item = add_to_cart(db, user_session, item.id, item.count)
+        add_to_cart(db, user_session, item.id, item.count)
         return JSONResponse(content={"success": True, "message": "Товар добавлен в корзину"})
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-# --- Добавление комментария ---
+# --- Добавление/обновление комментария ---
 @router.post("/cart/comment")
 async def add_comment_to_cart_item(
         comment_data: CartCommentRequest,
@@ -162,61 +163,6 @@ async def get_cart(
         total_items=total_items,
         total_price=total_price_formatted
     )
-
-
-# --- Обновление количества ---
-@router.post("/cart/update")
-async def update_item_quantity(
-        item: CartAddRequest,
-        request: Request,
-        response: Response,
-        db: Session = Depends(get_db),
-        session: Optional[str] = Cookie(None)
-):
-    user_session = get_user_session(request, response, session)
-    cart_item = get_cart_item_by_id(db, item.id)
-    if not cart_item or cart_item.user_session != user_session:
-        raise HTTPException(status_code=404, detail="Товар не найден в корзине")
-
-    if item.count == 0:
-        db.delete(cart_item)
-        db.commit()
-        return JSONResponse(content={"success": True, "message": "Товар удален из корзины"})
-
-    cart_item.quantity = item.count
-    db.commit()
-    db.refresh(cart_item)
-    return JSONResponse(content={"success": True, "message": "Количество товара обновлено"})
-
-
-# --- Предпросмотр оформления ---
-@router.get("/cart/checkout-preview", response_model=CartCheckoutPreview)
-async def checkout_preview(
-        request: Request,
-        response: Response,
-        currency: str = "RUB",
-        db: Session = Depends(get_db),
-        session: Optional[str] = Cookie(None)
-):
-    cart_response = await get_cart(request, response, currency, db, session)
-    return CartCheckoutPreview(
-        items=cart_response.items,
-        total_items=cart_response.total_items,
-        total_price=cart_response.total_price,
-        contact_info=None
-    )
-
-
-# --- Печать корзины ---
-@router.get("/cart/print")
-async def print_cart(
-        request: Request,
-        response: Response,
-        currency: str = "RUB",
-        db: Session = Depends(get_db),
-        session: Optional[str] = Cookie(None)
-):
-    return await get_cart(request, response, currency, db, session)
 
 
 # --- Очистка корзины ---
