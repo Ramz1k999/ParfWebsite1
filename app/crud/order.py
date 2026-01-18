@@ -69,6 +69,7 @@ def create_order(
         order_number=order_number,
         user_session=user_session,
         user_id=user_id,
+        status="ожидает подтверждения",   # ← прямо в конструкторе!
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
@@ -76,10 +77,7 @@ def create_order(
         notes=notes
     )
     
-    # Явно устанавливаем правильный статус (самый надёжный способ)
-    new_order.status = "ожидает подтверждения"  # ← строка напрямую
-    
-    print("[DEBUG-ORDER] Статус после явной установки:", new_order.status)
+    print("[DEBUG] Статус сразу в конструкторе:", new_order.status)
     
     db.add(new_order)
     db.flush() # Чтобы получить ID заказа
