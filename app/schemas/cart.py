@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class CartAddRequest(BaseModel):
-    product_id: int
+    id: int
     count: int = Field(default=1, ge=1)
     comment: Optional[str] = None
 
