@@ -1,22 +1,15 @@
 # app/crud/order.py
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
 from app.models.order import Order, OrderItem, OrderStatus
 from app.models.product import Product
 from app.models.cart import CartItem
-from typing import List, Optional
+from typing import Optional
 import random
 import string
 
 
 def generate_order_number():
-    """
-    Генерирует уникальный номер заказа.
-
-    Returns:
-        str: Номер заказа (6-значное число)
-    """
-    # Простая реализация - 6-значное число
+    """Генерация уникального 6-значного номера заказа"""
     return ''.join(random.choices(string.digits, k=6))
 
 
@@ -30,29 +23,30 @@ def create_order(
         user_id: Optional[int] = None
 ) -> Order:
     """
-    Создать новый заказ из товаров в корзине.
+    Создание нового заказа из товаров в корзине.
 
     Args:
-        db: Сессия базы данных
-        user_session: Идентификатор сессии пользователя
-        customer_name: Имя клиента
-        contact_phone: Контактный телефон
-        contact_email: Контактный email
-        notes: Дополнительные примечания к заказу
-        user_id: ID пользователя (если пользователь авторизован)
+        db: сессия базы данных
+        user_session: идентификатор сессии пользователя
+        customer_name: имя клиента
+        contact_phone: контактный телефон
+        contact_email: контактный email
+        notes: дополнительные примечания
+        user_id: ID пользователя (если авторизован)
 
     Returns:
-        Order: Созданный заказ
+        Order: созданный заказ
 
     Raises:
-        ValueError: Если корзина пуста
+        ValueError: если корзина пуста
     """
-    # Получаем товары из корзины
+
+    # Получаем все товары из корзины
     cart_items = db.query(CartItem).filter(CartItem.user_session == user_session).all()
     if not cart_items:
         raise ValueError("Корзина пуста")
 
-    # Генерируем номер заказа
+    # Генерируем уникальный номер заказа
     order_number = generate_order_number()
     while db.query(Order).filter(Order.order_number == order_number).first():
         order_number = generate_order_number()
@@ -64,12 +58,12 @@ def create_order(
         if product:
             total_amount += float(product.price_rub) * item.quantity
 
-    # Создаем заказ
+    # Создаем объект заказа с правильным статусом на русском
     new_order = Order(
         order_number=order_number,
         user_session=user_session,
         user_id=user_id,
-        status=OrderStatus.PENDING,  # ✅ enum на русском
+        status=OrderStatus.PENDING.value,  # 🔥 статус теперь корректный для базы
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
@@ -77,11 +71,8 @@ def create_order(
         notes=notes
     )
 
-    
-    print("[DEBUG] Статус сразу в конструкторе:", new_order.status)
-    
     db.add(new_order)
-    db.flush() # Чтобы получить ID заказа
+    db.flush()  # Получаем ID заказа
 
     # Добавляем товары из корзины в заказ
     for item in cart_items:
@@ -91,8 +82,8 @@ def create_order(
                 order_id=new_order.id,
                 product_id=item.product_id,
                 quantity=item.quantity,
-                price=product.price_rub,
-                comment=item.comment  # Сохраняем комментарий
+                price=float(product.price_rub),
+                comment=item.comment
             )
             db.add(order_item)
 
@@ -102,6 +93,7 @@ def create_order(
     db.commit()
     db.refresh(new_order)
     return new_order
+
 
 
 def get_user_orders(db: Session, user_session: str) -> List[Order]:
