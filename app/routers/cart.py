@@ -26,10 +26,18 @@ router = APIRouter()
 
 def get_user_session(request: Request, response: Response, session: Optional[str] = Cookie(None)):
     header_session = request.headers.get("X-User-Session")
+    
     if header_session:
+        print(f"[SESSION-DEBUG] Использован заголовок X-User-Session: {header_session}")
         return header_session
+    
+    print(f"[SESSION-DEBUG] Заголовок X-User-Session ОТСУТСТВУЕТ!")
     if session:
+        print(f"[SESSION-DEBUG] Использована кука session: {session}")
         return session
+    
+    # В продакшене лучше выбрасывать ошибку, а не создавать новую
+    print("[SESSION-DEBUG] НИКАКОЙ сессии нет → создаём новую")
     new_session = str(uuid.uuid4())
     response.set_cookie(key="session", value=new_session, max_age=60*60*24*30, httponly=True, samesite="lax", secure=False)
     return new_session
