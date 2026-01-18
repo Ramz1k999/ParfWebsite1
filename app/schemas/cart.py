@@ -1,5 +1,5 @@
 # app/schemas/cart.py
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -33,8 +33,7 @@ class CartItemResponse(BaseModel):
     total_price: float  # 🔥 ИЗМЕНЕНО: было str, стало float
     total_price_formatted: str  # 🔥 ДОБАВЛЕНО: для отображения
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CartResponse(BaseModel):
