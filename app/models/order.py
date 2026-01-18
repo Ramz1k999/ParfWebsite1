@@ -21,7 +21,11 @@ class Order(Base):
     user_session = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     status = Column(
-        SQLEnum(OrderStatus),  # ← заставляет использовать строковое значение
+        SQLEnum(
+            OrderStatus,
+            values_callable=lambda enum: [e.value for e in enum],  # ← ВАЖНО
+            native_enum=True
+        ),
         nullable=False
     )
     total_amount = Column(Float, nullable=False)
