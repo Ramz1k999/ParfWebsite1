@@ -20,7 +20,7 @@ class Order(Base):
     order_number = Column(String, unique=True, index=True, nullable=False)
     user_session = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    status = Column(SQLEnum(OrderStatus), default=OrderStatus.PENDING)
+    status = Column(SQLEnum(OrderStatus), default="ожидает подтверждения")
     total_amount = Column(Float, nullable=False)
     customer_name = Column(String, nullable=False)
     contact_phone = Column(String, nullable=False)
