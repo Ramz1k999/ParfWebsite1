@@ -69,13 +69,14 @@ def create_order(
         order_number=order_number,
         user_session=user_session,
         user_id=user_id,
-        status="ожидает подтверждения",   # ← прямо в конструкторе!
+        status=OrderStatus.PENDING,  # ✅ enum на русском
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
         contact_email=contact_email,
         notes=notes
     )
+
     
     print("[DEBUG] Статус сразу в конструкторе:", new_order.status)
     
