@@ -69,7 +69,7 @@ def create_order(
         order_number=order_number,
         user_session=user_session,
         user_id=user_id,
-        status=OrderStatus.ОЖИДАЕТ_ПОДТВЕРЖДЕНИЯ,  # ← используем правильный элемент Enum
+        status=OrderStatus.PENDING,  # ← используем правильный элемент Enum
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
