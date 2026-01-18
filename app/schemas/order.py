@@ -1,5 +1,5 @@
 # app/schemas/order.py
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -30,8 +30,7 @@ class OrderItemResponse(BaseModel):
     price: float
     comment: Optional[str] = None  # Комментарий к товару
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Схема для детального представления заказа
@@ -47,8 +46,7 @@ class OrderDetailResponse(BaseModel):
     items: List[OrderItemResponse]
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Схема для элемента в списке заказов
@@ -62,8 +60,7 @@ class OrderListItem(BaseModel):
     contact_phone: Optional[str] = None  # Для админского интерфейса
     total_amount: Optional[float] = None  # Для админского интерфейса
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Схема для ответа со списком заказов
 class OrderListResponse(BaseModel):
