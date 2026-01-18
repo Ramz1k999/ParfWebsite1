@@ -69,7 +69,7 @@ def create_order(
         order_number=order_number,
         user_session=user_session,
         user_id=user_id,  # Связываем заказ с пользователем, если он авторизован
-        status=OrderStatus.PENDING,
+        status="ожидает подтверждения",
         total_amount=total_amount,
         customer_name=customer_name,
         contact_phone=contact_phone,
