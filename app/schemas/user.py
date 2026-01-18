@@ -1,5 +1,5 @@
 # app/schemas/user.py
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -42,8 +42,7 @@ class UserResponse(UserBase):
     role: UserRole
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserListItem(BaseModel):
@@ -55,8 +54,7 @@ class UserListItem(BaseModel):
     role: UserRole
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserListResponse(BaseModel):
