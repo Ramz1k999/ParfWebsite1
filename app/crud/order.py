@@ -1,11 +1,13 @@
 # app/crud/order.py
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from app.models.order import Order, OrderItem, OrderStatus
 from app.models.product import Product
 from app.models.cart import CartItem
-from typing import Optional
+from typing import List, Optional  # ← добавлено
 import random
 import string
+
 
 
 def generate_order_number():
