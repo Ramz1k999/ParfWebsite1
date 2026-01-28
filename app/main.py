@@ -17,7 +17,7 @@ app = FastAPI(
 )
 
 # --- CORS middleware (централизованно для всех роутеров) ---
-origins = ["https://src-tjpz.onrender.com", "http://localhost:3000"]
+origins = ["https://dediparfum.ru", "http://localhost:3000"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
