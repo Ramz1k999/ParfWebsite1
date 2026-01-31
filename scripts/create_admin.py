@@ -1,52 +1,59 @@
-import sys
-import os
-from pathlib import Path
+# create_tables.py
+"""
+Скрипт для создания всех таблиц в базе данных.
+Запуск: python create_tables.py
+"""
 
-# Добавляем корневую директорию проекта в sys.path
-sys.path.append(str(Path(__file__).parent.parent))
+from app.database import Base, engine
 
-from sqlalchemy.orm import Session
-from app.database import SessionLocal, engine
-from app.models.user import User, Base
-from app.crud.user import get_user_by_email, create_user
+# Импортируем все модели, чтобы SQLAlchemy знал о них
+from app.models.user import User
+from app.models.product import Product
+from app.models.order import Order, OrderItem
+from app.models.cart import CartItem
+from app.models.currency import CurrencyRate
 
 
-def create_initial_admin():
-    """Создает таблицы и первого администратора, если он не существует"""
-    # Создаем таблицы
-    Base.metadata.create_all(bind=engine)
-
-    db = SessionLocal()
+def create_tables():
+    """Создает все таблицы в базе данных"""
+    print("🔄 Начинаю создание таблиц в базе данных...")
+    print(f"📍 Подключение к: {engine.url}")
+    
     try:
-        # Проверяем, существует ли администратор
-        admin_email = os.getenv("ADMIN_EMAIL", "jalal@example.com")
-        existing_admin = get_user_by_email(db, admin_email)
-
-        if existing_admin:
-            print(f"Администратор с email {admin_email} уже существует")
-            return
-
-        # Создаем администратора
-        admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
-        admin_username = os.getenv("ADMIN_USERNAME", "admin")
-
-        admin = create_user(
-            db=db,
-            email=admin_email,
-            username=admin_username,
-            password=admin_password,
-            full_name="Администратор системы",
-            is_admin=True
-        )
-
-        print(f"Администратор создан успешно: {admin_email}")
-        print(f"ID: {admin.id}, Имя пользователя: {admin.username}")
-
+        # Создаем все таблицы
+        Base.metadata.create_all(bind=engine)
+        
+        print("\n✅ Таблицы успешно созданы!")
+        print("\n📋 Созданные таблицы:")
+        print("   - users (пользователи)")
+        print("   - products (товары)")
+        print("   - orders (заказы)")
+        print("   - order_items (позиции заказов)")
+        print("   - cart_items (корзина)")
+        print("   - currency_rates (курсы валют)")
+        
     except Exception as e:
-        print(f"Ошибка при создании администратора: {str(e)}")
-    finally:
-        db.close()
+        print(f"\n❌ Ошибка при создании таблиц: {e}")
+        raise
+
+
+def drop_tables():
+    """ВНИМАНИЕ: Удаляет все таблицы! Используйте с осторожностью!"""
+    print("⚠️  ВНИМАНИЕ: Это удалит ВСЕ таблицы и данные!")
+    confirm = input("Вы уверены? Введите 'YES' для подтверждения: ")
+    
+    if confirm == "YES":
+        print("🔄 Удаление таблиц...")
+        Base.metadata.drop_all(bind=engine)
+        print("✅ Таблицы удалены")
+    else:
+        print("❌ Отменено")
 
 
 if __name__ == "__main__":
-    create_initial_admin()
+    import sys
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "--drop":
+        drop_tables()
+    else:
+        create_tables()
