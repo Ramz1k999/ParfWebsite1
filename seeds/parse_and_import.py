@@ -69,7 +69,6 @@ def parse_price_rub(price_str):
         return Decimal(price_clean) if price_clean else Decimal('0.00')
     except Exception as e:
         print(f"⚠ Ошибка парсинга цены '{price_str}': {e}")
-        print(f"   После очистки: '{price_clean}'")
         return Decimal('0.00')
 
 def apply_markup(price, markup_percent=20):
@@ -108,19 +107,30 @@ def parse_page(page_num, session):
         print(f"Ошибка на странице {page_num}: {e}")
         return []
 
-def save_products_to_db(products, db, markup_percent=20):
+def save_products_to_db(products, db, markup_percent=20, error_log_list=None):
     """Сохраняет товары в БД с наценкой"""
     imported_count = 0
     updated_count = 0
     error_count = 0
     
+    if error_log_list is None:
+        error_log_list = []
+    
     for product_data in products:
         try:
             name = product_data['name']
             price_rub_str = product_data['price_rub']
+            product_id = product_data.get('id', 'unknown')
             
             # Парсим и добавляем наценку
             base_price = parse_price_rub(price_rub_str)
+            
+            # Пропускаем товары с нулевой ценой
+            if base_price == Decimal('0.00'):
+                error_count += 1
+                error_log_list.append(f"ID:{product_id} | Нулевая цена | {name[:80]} | Цена: '{price_rub_str}'")
+                continue
+            
             final_price = apply_markup(base_price, markup_percent)
             
             # Проверяем существование
@@ -139,7 +149,7 @@ def save_products_to_db(products, db, markup_percent=20):
         
         except Exception as e:
             error_count += 1
-            print(f"❌ Ошибка сохранения: {e}")
+            error_log_list.append(f"ID:{product_id} | Ошибка БД | {name[:80] if 'name' in locals() else 'unknown'} | {str(e)}")
     
     return imported_count, updated_count, error_count
 
@@ -190,8 +200,10 @@ def main():
     total_imported = 0
     total_updated = 0
     total_errors = 0
+    total_parsed = 0
     empty_pages = 0
     start_time = time.time()
+    error_log_list = []
     
     try:
         for page in range(1, max_pages + 1):
@@ -209,14 +221,15 @@ def main():
                     break
             else:
                 empty_pages = 0
+                total_parsed += len(products)
                 
                 # Сохраняем в БД
-                imported, updated, errors = save_products_to_db(products, db, markup_percent)
+                imported, updated, errors = save_products_to_db(products, db, markup_percent, error_log_list)
                 total_imported += imported
                 total_updated += updated
                 total_errors += errors
                 
-                print(f"✓ +{imported} новых, ~{updated} обновл | Всего: {total_imported + total_updated}")
+                print(f"✓ +{imported} новых, ~{updated} обновл, ✗{errors} ошибок | Всего: {total_imported + total_updated}")
                 
                 # Коммит каждые 10 страниц
                 if page % 10 == 0:
@@ -234,13 +247,34 @@ def main():
         
         print("\n" + "="*60)
         print("✓ ИМПОРТ ЗАВЕРШЁН")
-        print(f"  Новых товаров: {total_imported}")
+        print(f"  Всего спарсено товаров: {total_parsed}")
+        print(f"  Новых товаров в БД: {total_imported}")
         print(f"  Обновлено: {total_updated}")
-        print(f"  Ошибок: {total_errors}")
-        print(f"  Всего в БД: {total_imported + total_updated}")
+        print(f"  Ошибок/пропущено: {total_errors}")
+        print(f"  Успешно в БД: {total_imported + total_updated}")
         print(f"  Время: {int(elapsed/60)} мин {int(elapsed%60)} сек")
         print(f"  Наценка: +{markup_percent}%")
         print("="*60)
+        
+        # Сохраняем лог ошибок
+        if error_log_list:
+            log_filename = 'import_errors.log'
+            with open(log_filename, 'w', encoding='utf-8') as f:
+                f.write(f"ЛОГ ОШИБОК ИМПОРТА\n")
+                f.write(f"{'='*60}\n")
+                f.write(f"Всего ошибок: {len(error_log_list)}\n")
+                f.write(f"Дата: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"{'='*60}\n\n")
+                
+                for i, error in enumerate(error_log_list, 1):
+                    f.write(f"{i}. {error}\n")
+            
+            print(f"\n⚠ Лог ошибок сохранён в {log_filename}")
+            print(f"Первые 10 ошибок:")
+            for i, error in enumerate(error_log_list[:10], 1):
+                print(f"  {i}. {error}")
+            if len(error_log_list) > 10:
+                print(f"  ... и ещё {len(error_log_list) - 10} ошибок (см. {log_filename})")
     
     except KeyboardInterrupt:
         print("\n\n⚠ Прервано (Ctrl+C)")
