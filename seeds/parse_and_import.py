@@ -106,7 +106,6 @@ def main():
     # Настройки
     print("\n=== НАСТРОЙКИ ===")
     phpsessid = input("PHPSESSID из браузера: ").strip()
-    wp_cookie = input("wordpress_logged_in cookie: ").strip()
     
     markup_percent = input("Наценка в % (Enter для 20%): ").strip()
     markup_percent = int(markup_percent) if markup_percent else 20
@@ -120,13 +119,12 @@ def main():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     })
     session.cookies.set('PHPSESSID', phpsessid)
-    session.cookies.set('wordpress_logged_in_8109e2f19f88599a3b2b8a021c6', wp_cookie)
     
     # Проверка авторизации
     print("\nПроверка авторизации...")
     test = session.get("https://perforyou.ru/?nav=1")
     if "js-product" not in test.text:
-        print("❌ Авторизация не удалась. Проверьте cookies.")
+        print("❌ Авторизация не удалась. Проверьте PHPSESSID.")
         return
     
     print("✓ Авторизация успешна!")
