@@ -29,17 +29,6 @@ def apply_markup(price, markup_percent=20):
     markup_multiplier = Decimal('1') + (Decimal(str(markup_percent)) / Decimal('100'))
     return (price * markup_multiplier).quantize(Decimal('0.01'))
 
-def extract_brand_from_name(name):
-    """Извлекает бренд из названия"""
-    parts = name.split()
-    return parts[0] if parts else None
-
-def extract_volume_from_name(name):
-    """Извлекает объём из названия"""
-    volume_pattern = r'(\d+[,.]?\d*)\s*(мл|ml|л|l|oz)'
-    match = re.search(volume_pattern, name.lower())
-    return match.group(0) if match else None
-
 def parse_page(page_num, session):
     """Парсит одну страницу товаров"""
     url = f"https://perforyou.ru/?nav={page_num}"
@@ -79,7 +68,6 @@ def save_products_to_db(products, db, markup_percent=20):
     
     for product_data in products:
         try:
-            product_id = product_data['id']
             name = product_data['name']
             price_rub_str = product_data['price_rub']
             
@@ -87,26 +75,16 @@ def save_products_to_db(products, db, markup_percent=20):
             base_price = parse_price_rub(price_rub_str)
             final_price = apply_markup(base_price, markup_percent)
             
-            # Извлекаем доп. данные
-            brand = extract_brand_from_name(name)
-            volume = extract_volume_from_name(name)
-            
             # Проверяем существование
             existing_product = db.query(Product).filter(Product.name == name).first()
             
             if existing_product:
                 existing_product.price_rub = final_price
-                existing_product.brand = brand
-                existing_product.volume = volume
-                existing_product.description = f"Обновлено (ID: {product_id}). База: {base_price}₽ +{markup_percent}%"
                 updated_count += 1
             else:
                 new_product = Product(
                     name=name,
-                    price_rub=final_price,
-                    brand=brand,
-                    volume=volume,
-                    description=f"Импорт (ID: {product_id}). База: {base_price}₽ +{markup_percent}%"
+                    price_rub=final_price
                 )
                 db.add(new_product)
                 imported_count += 1
