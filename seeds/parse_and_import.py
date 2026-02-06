@@ -7,12 +7,56 @@ import time
 import re
 from decimal import Decimal
 from sqlalchemy.orm import Session
+import getpass
 
 # Добавляем корневую директорию проекта в sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.database import SessionLocal, engine, Base
 from app.models.product import Product
+
+def login(session, username, password):
+    """Авторизация на сайте"""
+    login_url = "https://perforyou.ru/login/"
+    
+    login_data = {
+        'login-name': username,
+        'login-pass': password,
+        'login-remember': 'on'
+    }
+    
+    print("Попытка авторизации...")
+    response = session.post(login_url, data=login_data, allow_redirects=True)
+    
+    print(f"Status: {response.status_code}")
+    print(f"URL после логина: {response.url}")
+    
+    # Проверяем успешность
+    if "login" in response.url.lower():
+        print("❌ Ошибка авторизации. Проверьте логин и пароль.")
+        return False
+    
+    # Проверяем что есть товары
+    test = session.get("https://perforyou.ru/?nav=1")
+    if "js-product" in test.text:
+        print("✓ Авторизация успешна!")
+        
+        # Проверяем валюту
+        soup = BeautifulSoup(test.content, 'html.parser')
+        first_price = soup.find('tr', class_='js-product')
+        if first_price:
+            price_text = first_price.find_all('td')[1].text.strip()
+            print(f"Пример цены: {price_text}")
+            
+            if 'руб' in price_text.lower():
+                print("✓ Валюта: рубли")
+            elif '$' in price_text:
+                print("⚠ Валюта: доллары (может потребоваться переключение)")
+        
+        return True
+    else:
+        print("❌ Не удалось получить доступ к товарам")
+        return False
 
 def parse_price_rub(price_str):
     """Парсит цену из формата '47,5 руб.' в число"""
@@ -91,7 +135,7 @@ def save_products_to_db(products, db, markup_percent=20):
         
         except Exception as e:
             error_count += 1
-            print(f"❌ Ошибка сохранения товара {product_data.get('id')}: {e}")
+            print(f"❌ Ошибка сохранения: {e}")
     
     return imported_count, updated_count, error_count
 
@@ -104,31 +148,28 @@ def main():
     Base.metadata.create_all(bind=engine)
     
     # Настройки
-    print("\n=== НАСТРОЙКИ ===")
-    phpsessid = input("PHPSESSID из браузера: ").strip()
+    print("\n=== АВТОРИЗАЦИЯ ===")
+    username = input("Логин: ").strip()
+    password = getpass.getpass("Пароль: ")
     
+    # Создаём сессию
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    })
+    
+    # Авторизуемся
+    if not login(session, username, password):
+        return
+    
+    print("\n=== НАСТРОЙКИ ИМПОРТА ===")
     markup_percent = input("Наценка в % (Enter для 20%): ").strip()
     markup_percent = int(markup_percent) if markup_percent else 20
     
     max_pages = input("Макс. страниц (Enter для 9999): ").strip()
     max_pages = int(max_pages) if max_pages else 9999
     
-    # Создаём сессию для парсинга
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    })
-    session.cookies.set('PHPSESSID', phpsessid)
-    
-    # Проверка авторизации
-    print("\nПроверка авторизации...")
-    test = session.get("https://perforyou.ru/?nav=1")
-    if "js-product" not in test.text:
-        print("❌ Авторизация не удалась. Проверьте PHPSESSID.")
-        return
-    
-    print("✓ Авторизация успешна!")
-    print(f"✓ Наценка: +{markup_percent}%")
+    print(f"\n✓ Наценка: +{markup_percent}%")
     
     confirm = input("\nНачать импорт? (да/нет): ")
     if confirm.lower() not in ['да', 'yes', 'y', 'д']:
