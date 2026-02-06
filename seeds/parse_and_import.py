@@ -61,19 +61,15 @@ def login(session, username, password):
 def parse_price_rub(price_str):
     """Парсит цену из формата '47,5 руб.' в число"""
     try:
-        # Извлекаем только цифры и запятую/точку
-        price_clean = re.sub(r'[^\d,.]', '', price_str)
-        # Заменяем запятую на точку
+        # Сначала удаляем все кроме цифр и запятой
+        price_clean = re.sub(r'[^\d,]', '', price_str)
+        # Теперь заменяем запятую на точку
         price_clean = price_clean.replace(',', '.')
-        # Убираем лишние точки (если есть)
-        parts = price_clean.split('.')
-        if len(parts) > 2:
-            # Если несколько точек, берём последние 2 части
-            price_clean = parts[-2] + '.' + parts[-1]
         
         return Decimal(price_clean) if price_clean else Decimal('0.00')
     except Exception as e:
         print(f"⚠ Ошибка парсинга цены '{price_str}': {e}")
+        print(f"   После очистки: '{price_clean}'")
         return Decimal('0.00')
 
 def apply_markup(price, markup_percent=20):
