@@ -1,4 +1,4 @@
-# parse_and_import.py
+# parse_and_import_optimized.py
 import os
 import sys
 import requests
@@ -7,9 +7,10 @@ import time
 import re
 from decimal import Decimal
 from sqlalchemy.orm import Session
+from sqlalchemy import insert
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 import getpass
 
-# Добавляем корневую директорию проекта в sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.database import SessionLocal, engine, Base
@@ -29,29 +30,20 @@ def login(session, username, password):
     response = session.post(login_url, data=login_data, allow_redirects=True)
     
     print(f"Status: {response.status_code}")
-    print(f"URL после логина: {response.url}")
     
-    # Проверяем успешность
     if "login" in response.url.lower():
-        print("❌ Ошибка авторизации. Проверьте логин и пароль.")
+        print("❌ Ошибка авторизации")
         return False
     
-    # Проверяем что есть товары
     test = session.get("https://perforyou.ru/?nav=1")
     if "js-product" in test.text:
         print("✓ Авторизация успешна!")
         
-        # Проверяем валюту
         soup = BeautifulSoup(test.content, 'html.parser')
         first_price = soup.find('tr', class_='js-product')
         if first_price:
             price_text = first_price.find_all('td')[1].text.strip()
             print(f"Пример цены: {price_text}")
-            
-            if 'руб' in price_text.lower():
-                print("✓ Валюта: рубли")
-            elif '$' in price_text:
-                print("⚠ Валюта: доллары (может потребоваться переключение)")
         
         return True
     else:
@@ -61,14 +53,10 @@ def login(session, username, password):
 def parse_price_rub(price_str):
     """Парсит цену из формата '47,5 руб.' в число"""
     try:
-        # Сначала удаляем все кроме цифр и запятой
         price_clean = re.sub(r'[^\d,]', '', price_str)
-        # Теперь заменяем запятую на точку
         price_clean = price_clean.replace(',', '.')
-        
         return Decimal(price_clean) if price_clean else Decimal('0.00')
-    except Exception as e:
-        print(f"⚠ Ошибка парсинга цены '{price_str}': {e}")
+    except:
         return Decimal('0.00')
 
 def apply_markup(price, markup_percent=20):
@@ -107,90 +95,98 @@ def parse_page(page_num, session):
         print(f"Ошибка на странице {page_num}: {e}")
         return []
 
-def save_products_to_db(products, db, markup_percent=20, error_log_list=None):
-    """Сохраняет товары в БД с наценкой"""
+def bulk_save_products(products_batch, db, markup_percent=20):
+    """Массовое сохранение товаров (быстрее)"""
     imported_count = 0
-    updated_count = 0
     error_count = 0
+    error_log = []
     
-    if error_log_list is None:
-        error_log_list = []
+    products_to_insert = []
     
-    for product_data in products:
+    for product_data in products_batch:
         try:
             name = product_data['name']
             price_rub_str = product_data['price_rub']
             product_id = product_data.get('id', 'unknown')
             
-            # Парсим и добавляем наценку
             base_price = parse_price_rub(price_rub_str)
             
-            # Пропускаем товары с нулевой ценой
             if base_price == Decimal('0.00'):
                 error_count += 1
-                error_log_list.append(f"ID:{product_id} | Нулевая цена | {name[:80]} | Цена: '{price_rub_str}'")
+                error_log.append(f"ID:{product_id} | Нулевая цена: '{price_rub_str}'")
                 continue
             
             final_price = apply_markup(base_price, markup_percent)
             
-            # Проверяем существование
-            existing_product = db.query(Product).filter(Product.name == name).first()
+            products_to_insert.append({
+                'name': name,
+                'price_rub': final_price
+            })
             
-            if existing_product:
-                existing_product.price_rub = final_price
-                updated_count += 1
-            else:
-                new_product = Product(
-                    name=name,
-                    price_rub=final_price
-                )
-                db.add(new_product)
-                imported_count += 1
-        
         except Exception as e:
             error_count += 1
-            error_log_list.append(f"ID:{product_id} | Ошибка БД | {name[:80] if 'name' in locals() else 'unknown'} | {str(e)}")
+            error_log.append(f"ID:{product_id} | Ошибка: {str(e)}")
     
-    return imported_count, updated_count, error_count
+    # Массовая вставка
+    if products_to_insert:
+        try:
+            db.bulk_insert_mappings(Product, products_to_insert)
+            imported_count = len(products_to_insert)
+        except Exception as e:
+            print(f"  ❌ Ошибка bulk insert: {e}")
+            # Откат к обычной вставке
+            for product in products_to_insert:
+                try:
+                    existing = db.query(Product).filter(Product.name == product['name']).first()
+                    if not existing:
+                        db.add(Product(**product))
+                        imported_count += 1
+                except:
+                    error_count += 1
+    
+    return imported_count, error_count, error_log
 
 def main():
     print("="*60)
-    print("  Парсинг и импорт товаров perforyou.ru → БД")
+    print("  Парсинг и импорт товаров (ОПТИМИЗИРОВАННЫЙ)")
     print("="*60)
     
-    # Создаём таблицы если нужно
     Base.metadata.create_all(bind=engine)
     
-    # Настройки
     print("\n=== АВТОРИЗАЦИЯ ===")
     username = input("Логин: ").strip()
     password = getpass.getpass("Пароль: ")
     
-    # Создаём сессию
     session = requests.Session()
     session.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     })
     
-    # Авторизуемся
     if not login(session, username, password):
         return
     
-    print("\n=== НАСТРОЙКИ ИМПОРТА ===")
-    markup_percent = input("Наценка в % (Enter для 20%): ").strip()
+    print("\n=== НАСТРОЙКИ ===")
+    markup_percent = input("Наценка % (Enter для 20%): ").strip()
     markup_percent = int(markup_percent) if markup_percent else 20
     
     max_pages = input("Макс. страниц (Enter для 9999): ").strip()
     max_pages = int(max_pages) if max_pages else 9999
     
+    batch_size = input("Размер батча страниц (Enter для 20): ").strip()
+    batch_size = int(batch_size) if batch_size else 20
+    
+    pause = input("Пауза между запросами в сек (Enter для 0.5): ").strip()
+    pause = float(pause) if pause else 0.5
+    
     print(f"\n✓ Наценка: +{markup_percent}%")
+    print(f"✓ Батч: {batch_size} страниц")
+    print(f"✓ Пауза: {pause} сек")
     
     confirm = input("\nНачать импорт? (да/нет): ")
     if confirm.lower() not in ['да', 'yes', 'y', 'д']:
         print("Отменено")
         return
     
-    # Создаём БД сессию
     db = SessionLocal()
     
     print("\n" + "="*60)
@@ -198,18 +194,18 @@ def main():
     print("="*60 + "\n")
     
     total_imported = 0
-    total_updated = 0
     total_errors = 0
     total_parsed = 0
     empty_pages = 0
     start_time = time.time()
-    error_log_list = []
+    all_error_logs = []
+    
+    products_buffer = []
     
     try:
         for page in range(1, max_pages + 1):
-            print(f"[{page}/{max_pages}] Страница {page}...", end=' ')
+            print(f"[{page}/{max_pages}] ", end='')
             
-            # Парсим страницу
             products = parse_page(page, session)
             
             if not products:
@@ -217,69 +213,71 @@ def main():
                 print("⚠ Пустая")
                 
                 if empty_pages >= 5:
-                    print("\n✓ Достигнут конец каталога")
+                    print("\n✓ Конец каталога")
                     break
             else:
                 empty_pages = 0
                 total_parsed += len(products)
+                products_buffer.extend(products)
+                print(f"✓ +{len(products)}", end='')
                 
-                # Сохраняем в БД
-                imported, updated, errors = save_products_to_db(products, db, markup_percent, error_log_list)
-                total_imported += imported
-                total_updated += updated
-                total_errors += errors
-                
-                print(f"✓ +{imported} новых, ~{updated} обновл, ✗{errors} ошибок | Всего: {total_imported + total_updated}")
-                
-                # Коммит каждые 10 страниц
-                if page % 10 == 0:
+                # Сохраняем батчами
+                if len(products_buffer) >= batch_size * 50:  # ~50 товаров на страницу
+                    imported, errors, error_log = bulk_save_products(products_buffer, db, markup_percent)
                     db.commit()
-                    elapsed = time.time() - start_time
-                    print(f"  💾 Сохранено в БД | ⏱ {int(elapsed/60)} мин\n")
+                    
+                    total_imported += imported
+                    total_errors += errors
+                    all_error_logs.extend(error_log)
+                    
+                    print(f" | Батч сохранён: {imported} товаров")
+                    products_buffer = []
+                else:
+                    print()
             
-            # Пауза между запросами
-            time.sleep(2)
+            time.sleep(pause)
+            
+            # Прогресс каждые 100 страниц
+            if page % 100 == 0:
+                elapsed = time.time() - start_time
+                rate = page / elapsed * 60
+                remaining = (max_pages - page) / rate if rate > 0 else 0
+                print(f"  📊 Прогресс | Спарсено: {total_parsed} | В БД: {total_imported} | ~{int(remaining)} мин\n")
         
-        # Финальный коммит
-        db.commit()
+        # Сохраняем остаток
+        if products_buffer:
+            imported, errors, error_log = bulk_save_products(products_buffer, db, markup_percent)
+            db.commit()
+            total_imported += imported
+            total_errors += errors
+            all_error_logs.extend(error_log)
         
         elapsed = time.time() - start_time
         
         print("\n" + "="*60)
         print("✓ ИМПОРТ ЗАВЕРШЁН")
-        print(f"  Всего спарсено товаров: {total_parsed}")
-        print(f"  Новых товаров в БД: {total_imported}")
-        print(f"  Обновлено: {total_updated}")
-        print(f"  Ошибок/пропущено: {total_errors}")
-        print(f"  Успешно в БД: {total_imported + total_updated}")
+        print(f"  Спарсено товаров: {total_parsed}")
+        print(f"  Добавлено в БД: {total_imported}")
+        print(f"  Пропущено/ошибок: {total_errors}")
         print(f"  Время: {int(elapsed/60)} мин {int(elapsed%60)} сек")
-        print(f"  Наценка: +{markup_percent}%")
+        print(f"  Скорость: {int(total_parsed/(elapsed/60))} товаров/мин")
         print("="*60)
         
-        # Сохраняем лог ошибок
-        if error_log_list:
-            log_filename = 'import_errors.log'
-            with open(log_filename, 'w', encoding='utf-8') as f:
-                f.write(f"ЛОГ ОШИБОК ИМПОРТА\n")
-                f.write(f"{'='*60}\n")
-                f.write(f"Всего ошибок: {len(error_log_list)}\n")
-                f.write(f"Дата: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"{'='*60}\n\n")
-                
-                for i, error in enumerate(error_log_list, 1):
+        # Лог ошибок
+        if all_error_logs:
+            with open('import_errors.log', 'w', encoding='utf-8') as f:
+                f.write(f"Всего ошибок: {len(all_error_logs)}\n\n")
+                for i, error in enumerate(all_error_logs, 1):
                     f.write(f"{i}. {error}\n")
             
-            print(f"\n⚠ Лог ошибок сохранён в {log_filename}")
-            print(f"Первые 10 ошибок:")
-            for i, error in enumerate(error_log_list[:10], 1):
-                print(f"  {i}. {error}")
-            if len(error_log_list) > 10:
-                print(f"  ... и ещё {len(error_log_list) - 10} ошибок (см. {log_filename})")
+            print(f"\n⚠ Лог ошибок: import_errors.log")
+            print("Первые 10 ошибок:")
+            for error in all_error_logs[:10]:
+                print(f"  • {error}")
     
     except KeyboardInterrupt:
-        print("\n\n⚠ Прервано (Ctrl+C)")
+        print("\n\n⚠ Прервано")
         db.commit()
-        print(f"Сохранено: {total_imported + total_updated} товаров")
     except Exception as e:
         print(f"\n\n❌ Ошибка: {e}")
         import traceback
