@@ -4,13 +4,13 @@ from datetime import datetime
 
 class CurrencyRateCreate(BaseModel):
     currency_code: str
-    rate_to_rub: float
+    rate_to_usd: float
 
 
 class CurrencyRateResponse(BaseModel):
     id: int
     currency_code: str
-    rate_to_rub: float
+    rate_to_usd: float
     is_active: bool
     created_at: datetime
     updated_at: datetime
