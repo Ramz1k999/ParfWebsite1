@@ -8,7 +8,7 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
-    price_usd = Column(Numeric(10, 2), nullable=False)  # Цена в долларах
+    price_usd = Column(Numeric(12, 6), nullable=False)  # Цена в долларах
     brand = Column(String, index=True)
     volume = Column(String)
     description = Column(Text)
