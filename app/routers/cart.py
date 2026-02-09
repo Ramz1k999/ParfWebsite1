@@ -75,19 +75,19 @@ async def remove_item_from_cart(item: CartRemoveRequest, request: Request, respo
     raise HTTPException(status_code=404, detail="Товар не найден в корзине")
 
 @router.get("/cart", response_model=CartResponse)
-async def get_cart(request: Request, response: Response, currency: str = "RUB", db: Session = Depends(get_db), session: Optional[str] = Cookie(None)):
+async def get_cart(request: Request, response: Response, currency: str = "USD", db: Session = Depends(get_db), session: Optional[str] = Cookie(None)):
     user_session = get_user_session(request, response, session)
     cart_items = get_cart_items(db, user_session)
 
     items_response = []
     total_items = 0
     total_price_value = 0
-    currency_symbol = "руб." if currency == "RUB" else "$"
+    currency_symbol = "$" if currency == "USD" else "руб."
 
     for item in cart_items:
         product = get_product_by_id(db, item.product_id)
         if product:
-            price_per_item = convert_price(db, float(product.price_rub), currency)
+            price_per_item = convert_price(db, float(product.price_usd), currency)
             item_total = price_per_item * item.quantity
             items_response.append(
                 CartItemResponse(
