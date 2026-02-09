@@ -47,3 +47,7 @@ class CartCheckoutPreview(BaseModel):
     total_items: int
     total_price: str
     contact_info: Optional[dict] = None  # Контактная информация пользователя, если есть
+
+class CartUpdateRequest(BaseModel):
+    id: int      # ID записи в корзине
+    count: int   # Новое количество
