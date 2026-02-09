@@ -13,7 +13,7 @@ class ProductBase(BaseModel):
 
 class ProductCreate(ProductBase):
     """Схема для создания товара"""
-    price_rub: float = Field(..., gt=0)
+    price_usd: float = Field(..., gt=0)
 
 
 class ProductUpdate(BaseModel):
@@ -23,7 +23,7 @@ class ProductUpdate(BaseModel):
     Все поля опциональные, чтобы можно было обновлять только нужные поля.
     """
     name: Optional[str] = None
-    price_rub: Optional[float] = None
+    price_usd: Optional[float] = None
     description: Optional[str] = None
     brand: Optional[str] = None
     volume: Optional[str] = None
