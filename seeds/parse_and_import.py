@@ -50,17 +50,24 @@ def login(session, username, password):
         print("❌ Не удалось получить доступ к товарам")
         return False
 
-def parse_price_rub(price_str):
-    """Парсит цену из формата '47,5 руб.' в число"""
+def parse_price_usd(price_str):
+    """Парсит цену в долларах из различных форматов"""
     try:
-        price_clean = re.sub(r'[^\d,]', '', price_str)
+        # Убираем все кроме цифр, точек и запятых
+        price_clean = re.sub(r'[^\d,.]', '', price_str)
+        
+        # Заменяем запятую на точку (европейский формат)
         price_clean = price_clean.replace(',', '.')
+        
         return Decimal(price_clean) if price_clean else Decimal('0.00')
     except:
         return Decimal('0.00')
 
 def apply_markup(price, markup_percent=20):
-    """Добавляет наценку к цене"""
+    """Добавляет наценку к цене (только если цена > 0)"""
+    if price == Decimal('0.00'):
+        return Decimal('0.00')
+    
     markup_multiplier = Decimal('1') + (Decimal(str(markup_percent)) / Decimal('100'))
     return (price * markup_multiplier).quantize(Decimal('0.01'))
 
@@ -85,7 +92,7 @@ def parse_page(page_num, session):
                 product = {
                     'id': row.get('data-id', ''),
                     'name': cells[0].text.strip(),
-                    'price_rub': cells[1].text.strip()
+                    'price_usd': cells[1].text.strip()
                 }
                 products.append(product)
         
@@ -96,7 +103,7 @@ def parse_page(page_num, session):
         return []
 
 def bulk_save_products(products_batch, db, markup_percent=20):
-    """Массовое сохранение товаров (быстрее)"""
+    """Массовое сохранение товаров в USD"""
     imported_count = 0
     error_count = 0
     error_log = []
@@ -106,21 +113,19 @@ def bulk_save_products(products_batch, db, markup_percent=20):
     for product_data in products_batch:
         try:
             name = product_data['name']
-            price_rub_str = product_data['price_rub']
+            price_usd_str = product_data['price_usd']
             product_id = product_data.get('id', 'unknown')
             
-            base_price = parse_price_rub(price_rub_str)
+            # Парсим цену в долларах
+            base_price_usd = parse_price_usd(price_usd_str)
             
-            if base_price == Decimal('0.00'):
-                error_count += 1
-                error_log.append(f"ID:{product_id} | Нулевая цена: '{price_rub_str}'")
-                continue
-            
-            final_price = apply_markup(base_price, markup_percent)
+            # ИЗМЕНЕНО: Не пропускаем товары с нулевой ценой
+            # Применяем наценку (для нулевой цены вернется 0.00)
+            final_price_usd = apply_markup(base_price_usd, markup_percent)
             
             products_to_insert.append({
                 'name': name,
-                'price_rub': final_price
+                'price_usd': final_price_usd
             })
             
         except Exception as e:
@@ -148,7 +153,7 @@ def bulk_save_products(products_batch, db, markup_percent=20):
 
 def main():
     print("="*60)
-    print("  Парсинг и импорт товаров (ОПТИМИЗИРОВАННЫЙ)")
+    print("  Парсинг и импорт товаров (ЦЕНЫ В USD)")
     print("="*60)
     
     Base.metadata.create_all(bind=engine)
@@ -181,6 +186,8 @@ def main():
     print(f"\n✓ Наценка: +{markup_percent}%")
     print(f"✓ Батч: {batch_size} страниц")
     print(f"✓ Пауза: {pause} сек")
+    print(f"\nПример: $10.00 → ${(10 * (1 + markup_percent/100)):.2f}")
+    print(f"         $0.00 → $0.00 (товары с нулевой ценой тоже импортируются)")
     
     confirm = input("\nНачать импорт? (да/нет): ")
     if confirm.lower() not in ['да', 'yes', 'y', 'д']:
@@ -222,7 +229,7 @@ def main():
                 print(f"✓ +{len(products)}", end='')
                 
                 # Сохраняем батчами
-                if len(products_buffer) >= batch_size * 50:  # ~50 товаров на страницу
+                if len(products_buffer) >= batch_size * 50:
                     imported, errors, error_log = bulk_save_products(products_buffer, db, markup_percent)
                     db.commit()
                     
@@ -257,7 +264,7 @@ def main():
         print("\n" + "="*60)
         print("✓ ИМПОРТ ЗАВЕРШЁН")
         print(f"  Спарсено товаров: {total_parsed}")
-        print(f"  Добавлено в БД: {total_imported}")
+        print(f"  Добавлено в БД: {total_imported} (в USD, включая $0.00)")
         print(f"  Пропущено/ошибок: {total_errors}")
         print(f"  Время: {int(elapsed/60)} мин {int(elapsed%60)} сек")
         print(f"  Скорость: {int(total_parsed/(elapsed/60))} товаров/мин")
