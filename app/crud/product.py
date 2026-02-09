@@ -6,20 +6,45 @@ from typing import List, Optional
 from app.cache import cache
 
 
-@cache(ttl_seconds=60 * 5)  # Кэшируем на 5 минут
-def get_all_products(db: Session, skip: int = 0, limit: int = 100) -> List[Product]:
+@cache(ttl_seconds=60 * 5)
+def get_all_products(
+        db: Session,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: str = "name",
+        sort_dir: str = "asc"
+) -> List[Product]:
     """
-    Получить все товары с пагинацией.
+    Получить все товары с пагинацией и сортировкой.
 
     Args:
         db: Сессия базы данных
         skip: Сколько записей пропустить
         limit: Максимальное количество записей
+        sort_by: Поле для сортировки (name/price/updated_at)
+        sort_dir: Направление сортировки (asc/desc)
 
     Returns:
         List[Product]: Список товаров
     """
-    return db.query(Product).offset(skip).limit(limit).all()
+    query = db.query(Product)
+
+    # Маппинг полей сортировки
+    sort_fields = {
+        "name": Product.name,
+        "price": Product.price_usd,
+        "updated_at": Product.updated_at,
+        "date": Product.updated_at,
+    }
+
+    sort_column = sort_fields.get(sort_by, Product.name)
+
+    if sort_dir == "desc":
+        query = query.order_by(desc(sort_column))
+    else:
+        query = query.order_by(sort_column)
+
+    return query.offset(skip).limit(limit).all()
 
 
 @cache(ttl_seconds=60 * 5)
