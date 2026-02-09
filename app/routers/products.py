@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/products", response_model=ProductListResponse)
 async def read_products(
-        currency: str = Query("RUB", description="Валюта (USD/RUB)"),
+        currency: str = Query("USD", description="Валюта (USD/RUB)"),
         page: int = Query(1, ge=1, description="Номер страницы"),
         per_page: int = Query(50, ge=1, le=100, description="Товаров на странице"),
         db: Session = Depends(get_db)
@@ -28,8 +28,8 @@ async def read_products(
         product_items = []
         for product in products:
             try:
-                converted_price = convert_price(db, float(product.price_rub), currency)
-                currency_symbol = "руб." if currency == "RUB" else "$"
+                converted_price = convert_price(db, float(product.price_usd), currency)
+                currency_symbol = "$" if currency == "USD" else "руб."
 
                 item = ProductListItem(
                     id=product.id,
@@ -69,7 +69,7 @@ async def search_products_api(
         brand: Optional[str] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
-        currency: str = Query("RUB", description="Валюта (USD/RUB)"),
+        currency: str = Query("USD", description="Валюта (USD/RUB)"),
         sort_by: str = Query("name", description="Поле для сортировки (name/price/date)"),
         sort_dir: str = Query("asc", description="Направление сортировки (asc/desc)"),
         page: int = Query(1, ge=1, description="Номер страницы"),
@@ -105,8 +105,8 @@ async def search_products_api(
         product_items = []
         for product in products:
             try:
-                converted_price = convert_price(db, float(product.price_rub), currency)
-                currency_symbol = "руб." if currency == "RUB" else "$"
+                converted_price = convert_price(db, float(product.price_usd), currency)
+                currency_symbol = "$" if currency == "USD" else "руб."
 
                 item = ProductListItem(
                     id=product.id,
@@ -160,7 +160,7 @@ async def get_filters(db: Session = Depends(get_db)):
 
 
 @router.get("/products/{product_id}", response_model=ProductDetail)
-async def read_product(product_id: int, currency: str = "RUB", db: Session = Depends(get_db)):
+async def read_product(product_id: int, currency: str = "USD", db: Session = Depends(get_db)):
     """Получить детальную информацию о товаре по ID"""
     product = get_product_by_id(db, product_id)
     if product is None:
@@ -169,8 +169,8 @@ async def read_product(product_id: int, currency: str = "RUB", db: Session = Dep
 
     try:
         # Конвертируем цену в нужную валюту
-        converted_price = convert_price(db, float(product.price_rub), currency)
-        currency_symbol = "руб." if currency == "RUB" else "$"
+        converted_price = convert_price(db, float(product.price_usd), currency)
+        currency_symbol = "$" if currency == "USD" else "руб."
 
         # Создаем объект с детальной информацией о товаре
         product_detail = ProductDetail(
@@ -206,21 +206,21 @@ async def create_product_api(
         new_product = create_product(
             db=db,
             name=product_data.name,
-            price_rub=product_data.price_rub,
+            price_usd=product_data.price_usd,
             description=product_data.description,
             brand=product_data.brand,
             volume=product_data.volume
         )
 
         # Конвертируем цену для ответа
-        currency = "RUB"
-        currency_symbol = "руб."
+        currency = "USD"
+        currency_symbol = "$"
 
         return ProductDetail(
             id=new_product.id,
             name=new_product.name,
-            price=float(new_product.price_rub),
-            price_formatted=f"{float(new_product.price_rub):,.1f} {currency_symbol}",
+            price=float(new_product.price_usd),
+            price_formatted=f"{float(new_product.price_usd):,.1f} {currency_symbol}",
             currency=currency_symbol,
             description=new_product.description,
             brand=new_product.brand,
@@ -247,7 +247,7 @@ async def update_product_api(
         db=db,
         product_id=product_id,
         name=product_data.name,
-        price_rub=product_data.price_rub,
+        price_usd=product_data.price_usd,
         description=product_data.description,
         brand=product_data.brand,
         volume=product_data.volume
@@ -258,14 +258,14 @@ async def update_product_api(
         raise HTTPException(status_code=404, detail="Товар не найден")
 
     # Конвертируем цену для ответа
-    currency = "RUB"
-    currency_symbol = "руб."
+    currency = "USD"
+    currency_symbol = "$"
 
     return ProductDetail(
         id=updated_product.id,
         name=updated_product.name,
-        price=float(updated_product.price_rub),
-        price_formatted=f"{float(updated_product.price_rub):,.1f} {currency_symbol}",
+        price=float(updated_product.price_usd),
+        price_formatted=f"{float(updated_product.price_usd):,.1f} {currency_symbol}",
         currency=currency_symbol,
         description=updated_product.description,
         brand=updated_product.brand,
