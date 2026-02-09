@@ -17,12 +17,20 @@ async def read_products(
         currency: str = Query("USD", description="Валюта (USD/RUB)"),
         page: int = Query(1, ge=1, description="Номер страницы"),
         per_page: int = Query(50, ge=1, le=100, description="Товаров на странице"),
+        sort_by: str = Query("name", description="Поле для сортировки (name/price/updated_at)"),
+        sort_dir: str = Query("asc", description="Направление сортировки (asc/desc)"),
         db: Session = Depends(get_db)
 ):
-    """Получить список всех товаров с пагинацией"""
+    """Получить список всех товаров с пагинацией и сортировкой"""
     try:
         offset = (page - 1) * per_page
-        products = get_all_products(db, skip=offset, limit=per_page)
+        products = get_all_products(
+            db,
+            skip=offset,
+            limit=per_page,
+            sort_by=sort_by,
+            sort_dir=sort_dir
+        )
         total_count = count_products(db)
 
         product_items = []
@@ -45,7 +53,6 @@ async def read_products(
                 product_items.append(item)
 
             except ValueError:
-                # Обработка ошибки конвертации цены
                 api_logger.error(f"Ошибка конвертации цены для товара {product.id}")
                 pass
 
@@ -61,7 +68,7 @@ async def read_products(
     except Exception as e:
         api_logger.error(f"Ошибка при получении списка товаров: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Ошибка: {str(e)}")
-
+        
 
 @router.get("/products/search", response_model=ProductListResponse)
 async def search_products_api(
