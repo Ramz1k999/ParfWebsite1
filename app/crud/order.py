@@ -58,7 +58,7 @@ def create_order(
     for item in cart_items:
         product = db.query(Product).filter(Product.id == item.product_id).first()
         if product:
-            total_amount += float(product.price_rub) * item.quantity
+            total_amount += float(product.price_usd) * item.quantity
 
     # Создаем объект заказа с правильным статусом на русском
     new_order = Order(
@@ -84,7 +84,7 @@ def create_order(
                 order_id=new_order.id,
                 product_id=item.product_id,
                 quantity=item.quantity,
-                price=float(product.price_rub),
+                price=float(product.price_usd),
                 comment=item.comment
             )
             db.add(order_item)
