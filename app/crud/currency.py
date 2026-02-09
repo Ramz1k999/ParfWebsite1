@@ -18,7 +18,7 @@ def create_currency_rate(db: Session, currency_code: str, rate: float, admin_id:
     # Создаем новый
     db_rate = CurrencyRate(
         currency_code=currency_code,
-        rate_to_rub=rate,
+        rate_to_usd=rate,
         created_by=admin_id
     )
     db.add(db_rate)
