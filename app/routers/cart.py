@@ -10,6 +10,7 @@ from app.schemas.cart import (
     CartItemResponse,
     CartCommentRequest,
     CartCheckoutPreview,
+    CartUpdateRequest,  # ← ДОБАВЛЕНО
 )
 from app.crud.cart import (
     add_to_cart,
@@ -17,6 +18,7 @@ from app.crud.cart import (
     get_cart_items,
     clear_cart,
     update_cart_comment,
+    update_cart_quantity,  # ← ДОБАВЛЕНО
     get_cart_item_by_id,
 )
 from app.crud.product import convert_price, get_product_by_id
@@ -36,13 +38,10 @@ def get_user_session(request: Request, response: Response, session: Optional[str
         print(f"[SESSION-DEBUG] Использована кука session: {session}")
         return session
     
-    # В продакшене лучше выбрасывать ошибку, а не создавать новую
     print("[SESSION-DEBUG] НИКАКОЙ сессии нет → создаём новую")
     new_session = str(uuid.uuid4())
     response.set_cookie(key="session", value=new_session, max_age=60*60*24*30, httponly=True, samesite="lax", secure=False)
     return new_session
-
-# --- CRUD эндпоинты (без CORS в каждом) ---
 
 @router.post("/cart/add")
 async def add_item_to_cart(item: CartAddRequest, request: Request, response: Response, db: Session = Depends(get_db), session: Optional[str] = Cookie(None)):
@@ -52,6 +51,38 @@ async def add_item_to_cart(item: CartAddRequest, request: Request, response: Res
         return {"success": True, "message": "Товар добавлен в корзину"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+# ← НОВЫЙ ЭНДПОИНТ
+@router.post("/cart/update")
+async def update_cart_item(
+    item: CartUpdateRequest,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    session: Optional[str] = Cookie(None)
+):
+    user_session = get_user_session(request, response, session)
+    
+    cart_item = get_cart_item_by_id(db, item.id)
+    
+    if not cart_item or cart_item.user_session != user_session:
+        raise HTTPException(status_code=404, detail="Товар не найден в корзине")
+    
+    if item.count <= 0:
+        db.delete(cart_item)
+        db.commit()
+        return {"success": True, "message": "Товар удален из корзины"}
+    
+    updated_item = update_cart_quantity(db, user_session, cart_item.product_id, item.count)
+    
+    if updated_item:
+        return {
+            "success": True, 
+            "message": "Количество обновлено",
+            "quantity": updated_item.quantity
+        }
+    
+    raise HTTPException(status_code=500, detail="Не удалось обновить количество")
 
 @router.post("/cart/comment")
 async def add_comment_to_cart_item(comment_data: CartCommentRequest, request: Request, response: Response, db: Session = Depends(get_db), session: Optional[str] = Cookie(None)):
