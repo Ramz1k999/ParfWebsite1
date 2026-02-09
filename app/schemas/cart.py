@@ -39,7 +39,7 @@ class CartItemResponse(BaseModel):
 class CartResponse(BaseModel):
     items: List[CartItemResponse]
     total_items: int = Field(..., description="Общее количество товаров")
-    total_price: str = Field(..., description="Общая стоимость, например '0,0 руб.'")
+    total_price: str = Field(..., description="Общая стоимость, например '0,0 $' или '0,0 руб.'")
 
 
 class CartCheckoutPreview(BaseModel):
