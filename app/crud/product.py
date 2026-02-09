@@ -53,7 +53,7 @@ def get_product_by_id(db: Session, product_id: int) -> Optional[Product]:
 def create_product(
         db: Session,
         name: str,
-        price_rub: float,
+        price_usd: float,
         description: Optional[str] = None,
         brand: Optional[str] = None,
         volume: Optional[str] = None
@@ -64,7 +64,7 @@ def create_product(
     Args:
         db: Сессия базы данных
         name: Название товара
-        price_rub: Цена в рублях
+        price_usd: Цена в долларах
         description: Описание товара
         brand: Бренд
         volume: Объем
@@ -74,7 +74,7 @@ def create_product(
     """
     db_product = Product(
         name=name,
-        price_rub=price_rub,
+        price_usd=price_usd,
         description=description,
         brand=brand,
         volume=volume
@@ -89,7 +89,7 @@ def update_product(
         db: Session,
         product_id: int,
         name: Optional[str] = None,
-        price_rub: Optional[float] = None,
+        price_usd: Optional[float] = None,
         description: Optional[str] = None,
         brand: Optional[str] = None,
         volume: Optional[str] = None
@@ -101,7 +101,7 @@ def update_product(
         db: Сессия базы данных
         product_id: ID товара
         name: Новое название товара
-        price_rub: Новая цена в рублях
+        price_usd: Новая цена в долларах
         description: Новое описание товара
         brand: Новый бренд
         volume: Новый объем
@@ -115,8 +115,8 @@ def update_product(
 
     if name is not None:
         product.name = name
-    if price_rub is not None:
-        product.price_rub = price_rub
+    if price_usd is not None:
+        product.price_usd = price_usd
     if description is not None:
         product.description = description
     if brand is not None:
@@ -149,14 +149,14 @@ def delete_product(db: Session, product_id: int) -> bool:
     return True
 
 
-def convert_price(db: Session, price_rub: float, currency: str = "RUB") -> float:
+def convert_price(db: Session, price_usd: float, currency: str = "USD") -> float:
     """
     Конвертировать цену в указанную валюту.
 
     Args:
         db: Сессия базы данных
-        price_rub: Цена в рублях
-        currency: Валюта для конвертации (RUB или USD)
+        price_usd: Цена в долларах
+        currency: Валюта для конвертации (USD или RUB)
 
     Returns:
         float: Цена в указанной валюте
@@ -164,16 +164,16 @@ def convert_price(db: Session, price_rub: float, currency: str = "RUB") -> float
     Raises:
         ValueError: Если валюта не поддерживается
     """
-    if currency == "RUB":
-        return price_rub
-    elif currency == "USD":
-        # Получаем курс доллара
-        rate = db.query(CurrencyRate).filter(CurrencyRate.code == "USD").first()
+    if currency == "USD":
+        return price_usd
+    elif currency == "RUB":
+        # Получаем курс рубля к доллару
+        rate = db.query(CurrencyRate).filter(CurrencyRate.currency_code == "RUB").first()
         if rate:
-            return price_rub / float(rate.rate)
+            return price_usd * float(rate.rate_to_usd)
         else:
-            # Если курс не найден, используем фиксированный курс
-            return price_rub / 75.0
+            # Если курс не найден, используем фиксированный курс (1 USD = 95 RUB)
+            return price_usd * 95.0
     else:
         raise ValueError(f"Неподдерживаемая валюта: {currency}")
 
@@ -214,9 +214,9 @@ def search_products(
     if brand:
         query = query.filter(Product.brand.ilike(f"%{brand}%"))
     if min_price is not None:
-        query = query.filter(Product.price_rub >= min_price)
+        query = query.filter(Product.price_usd >= min_price)
     if max_price is not None:
-        query = query.filter(Product.price_rub <= max_price)
+        query = query.filter(Product.price_usd <= max_price)
 
     # Применяем сортировку
     if sort_by == "name":
@@ -226,9 +226,9 @@ def search_products(
             query = query.order_by(desc(Product.name))
     elif sort_by == "price":
         if sort_dir == "asc":
-            query = query.order_by(Product.price_rub)
+            query = query.order_by(Product.price_usd)
         else:
-            query = query.order_by(desc(Product.price_rub))
+            query = query.order_by(desc(Product.price_usd))
     elif sort_by == "date":
         if sort_dir == "asc":
             query = query.order_by(Product.created_at)
@@ -267,9 +267,9 @@ def count_search_results(
     if brand:
         query = query.filter(Product.brand.ilike(f"%{brand}%"))
     if min_price is not None:
-        query = query.filter(Product.price_rub >= min_price)
+        query = query.filter(Product.price_usd >= min_price)
     if max_price is not None:
-        query = query.filter(Product.price_rub <= max_price)
+        query = query.filter(Product.price_usd <= max_price)
 
     return query.count()
 
@@ -298,6 +298,6 @@ def get_price_range(db: Session) -> tuple:
     Returns:
         tuple: (min_price, max_price)
     """
-    min_price = db.query(func.min(Product.price_rub)).scalar() or 0
-    max_price = db.query(func.max(Product.price_rub)).scalar() or 0
+    min_price = db.query(func.min(Product.price_usd)).scalar() or 0
+    max_price = db.query(func.max(Product.price_usd)).scalar() or 0
     return (min_price, max_price)
