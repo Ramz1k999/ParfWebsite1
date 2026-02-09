@@ -18,7 +18,7 @@ async def set_currency_rate(
     return create_currency_rate(
         db,
         rate_data.currency_code,
-        rate_data.rate_to_rub,
+        rate_data.rate_to_usd,
         current_admin.id  # Получаем ID из токена
     )
 
